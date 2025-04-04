@@ -52,6 +52,7 @@ exports.loginUser = async (req, res) => {
                 userId: user._id,
                 role: user.role,
                 institutionId: user.institutionId._id,
+                batchId: user.batchId
             },
             JWT_SECRET,
             { expiresIn: "2d" }

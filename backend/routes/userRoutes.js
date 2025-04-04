@@ -8,7 +8,8 @@ const {
   getUserById,
   updateUser,
   deleteUser,
-  getAllUsers
+  getAllUsers,
+  getAllStudents
 } = require("../controllers/userController");
 
 // ✅ Apply auth & role check to all routes
@@ -20,5 +21,6 @@ router.get("/", getUsers);
 router.get("/:id", getUserById);
 router.put("/:id", updateUser);
 router.delete("/:id", deleteUser);
+router.get("/students", getAllStudents);
 
 module.exports = router;

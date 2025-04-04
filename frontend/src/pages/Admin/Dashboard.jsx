@@ -96,6 +96,18 @@ const AdminDashboard = () => {
                         <p className="text-muted">View Batches</p>
                     </div>
                 </div>
+
+
+                <div className="col-md-4">
+                    <div
+                        className="card shadow-sm p-3 text-center"
+                        onClick={() => navigate("/admin-attendance-dashboard")}
+                        style={{ cursor: "pointer" }}
+                    >
+                        <h5>Attendance </h5>
+                        <p className="text-muted">View Attendance</p>
+                    </div>
+                </div>
             </div>
         </div>
     );

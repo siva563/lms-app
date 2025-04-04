@@ -14,6 +14,10 @@ import AdminCourseManager from "./pages/Admin/AdminCourseManager";
 import AdminBatchManager from "./pages/Admin/AdminBatchManager";
 import SetPassword from "./pages/Auth/SetPassword";
 import AttendanceReport from "./pages/Admin/AttendanceReport";
+import CandidateDashboard from "./pages/Student/StudentDashboard/CandidateDashboard";
+import FullAttendancePage from "./pages/Student/components/FullAttendancePage";
+import AttendanceDashboard from "./pages/Admin/AttendanceDashboard";
+
 
 function App() {
   return (
@@ -33,6 +37,11 @@ function App() {
       <Route path="/admin/batches" element={<AdminBatchManager />} />
       <Route path="/set-password" element={<SetPassword />} />
       <Route path="/attendance-report" element={<AttendanceReport />} />
+      <Route path="/candidateboard" element={<CandidateDashboard />} />
+      <Route path="/full-attendance" element={<FullAttendancePage />} />
+      <Route path="/admin-attendance-dashboard" element={<AttendanceDashboard />} />
+
+
 
       {/* <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/instructor" element={<InstructorDashboard />} />

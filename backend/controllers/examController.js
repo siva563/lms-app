@@ -1,4 +1,5 @@
 const Exam = require("../models/Exam");
+const ExamSubmission = require("../models/submissionModel");
 
 exports.createExam = async (req, res) => {
     console.log("👤 req.user:", req.user);
@@ -83,3 +84,6 @@ exports.getExamById = async (req, res) => {
         res.status(500).json({ message: "Failed to fetch exam details" });
     }
 };
+
+
+

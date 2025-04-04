@@ -32,7 +32,21 @@ export const fetchUsers = async () => {
     } catch (err) {
         console.error("❌ Error fetching users:", err.response?.data?.message || err.message);
         alert("Failed to fetch users. Try logging in again.");
-    } 
+    }
+};
+
+export const fetchStudents = async () => {
+   // const token = getToken();
+    try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get(`${API}/students`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        return res.data;
+    } catch (err) {
+        console.error("❌ Failed to fetch students:", err);
+        return [];
+    }
 };
 
 
