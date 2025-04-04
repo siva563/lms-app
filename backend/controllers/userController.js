@@ -255,3 +255,19 @@ exports.markAttendance = async (req, res) => {
 //     res.status(500).json({ message: "Failed to fetch users" });
 //   }
 // };
+
+exports.getAllStudents = async (req, res) => {
+  try {
+    const institutionId = req.user.institutionId;
+
+    const students = await User.find({
+      institutionId,
+      role: "student",
+    }).select("_id name batchId");
+
+    res.json(students);
+  } catch (err) {
+    console.error("❌ Failed to fetch students:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};

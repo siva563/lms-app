@@ -6,10 +6,13 @@ exports.createBatch = async (req, res) => {
             name,
             startDate,
             endDate,
+            startTime, // ✅ add this
+            endTime,   // ✅ add this
             courseId,
             batchSize,
             price,
-            type
+            type,
+
         } = req.body;
 
         const institutionId = req.user.institutionId;
@@ -19,6 +22,8 @@ exports.createBatch = async (req, res) => {
             name,
             startDate,
             endDate,
+            startTime, // ✅ add this
+            endTime,   // ✅ add this
             courseId,
             batchSize,
             price,
@@ -91,3 +96,13 @@ exports.deleteBatch = async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 };
+
+// exports.getBatchById = async (req, res) => {
+//     try {
+//         const batch = await Batch.findById(req.params.batchId);
+//         if (!batch) return res.status(404).json({ message: "Batch not found" });
+//         res.json(batch);
+//     } catch (err) {
+//         res.status(500).json({ message: "Server error" });
+//     }
+// };
