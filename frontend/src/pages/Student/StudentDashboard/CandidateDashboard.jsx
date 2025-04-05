@@ -1,8 +1,6 @@
 import React from "react";
 import TopNavbar from "./TopNavbar";
-
 import { getUserData } from "../../../utils/tokenHelper";
-
 import AttendanceCard from "../components/AttendanceCard";
 import CourseProgressCard from "../components/CourseProgressCard";
 import RankCard from "../components/RankCard";
@@ -33,21 +31,21 @@ const CandidateDashboard = () => {
                 </div>
                 <div className="row">
                     {/* Attendance Card */}
-                    <div className="col-md-6 col-lg-3 mb-4">
+                    {/* <div className="col-md-6 col-lg-3 mb-4">
                         <AttendanceCard batchId={batchId} />
-                    </div>
+                    </div> */}
 
-                    <div className="col-md-6 col-lg-3 mb-4">
+                    {/* <div className="col-md-6 col-lg-3 mb-4">
                         <CourseProgressCard />
-                    </div>
+                    </div> */}
 
-                    <div className="col-md-6 col-lg-3 mb-4">
+                    {/* <div className="col-md-6 col-lg-3 mb-4">
                         <RankCard />
-                    </div>
+                    </div> */}
 
-                    <div className="col-md-6 col-lg-3 mb-4">
+                    {/* <div className="col-md-6 col-lg-3 mb-4">
                         <ExamStatsCard />
-                    </div>
+                    </div> */}
 
                     {/* <div className="col-12 mb-4">
                         <AttendanceCalendar />

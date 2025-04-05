@@ -77,7 +77,7 @@ export const markOnlineAPI = async () => {
     const res = await axios.post(
         "/api/attendance/mark-online",
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${getToken()}` } }
     );
     return res.data;
 };
@@ -91,7 +91,7 @@ export const fetchBatchDaysFromService = async () => {
     const batchId = payload.batchId;
 
     const res = await axios.get(`${API}/batches/${batchId}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
     });
 
     const start = new Date(res.data.startDate);
@@ -112,7 +112,37 @@ export const fetchBatchDaysFromService = async () => {
 export const fetchFullAttendance = async (from, to) => {
     const token = localStorage.getItem("token");
     const res = await axios.get(`${API}/attendance/calendar-view?from=${from}&to=${to}`, {
-      headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
     });
     return res.data;
-  };
+};
+
+export const fetchTodayAttendanceAPI = async () => {
+    const res = await axios.get(`${API}/attendance/today`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+    });
+    return res.data;
+};
+
+export const fetchMonthlyAttendanceSummaryAPI = async () => {
+    const month = new Date().toISOString().slice(0, 7); // YYYY-MM
+    const res = await axios.get(`${API}/attendance/summary?month=${month}`, { headers: { Authorization: `Bearer ${getToken()}` } });
+    return res.data;
+};
+
+export const fetchCourseSummaryAPI = async () => {
+    try {
+        const token = localStorage.getItem("token");
+
+        const res = await axios.get(`${API}/attendance/course-summary`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        return res.data;
+    } catch (err) {
+        console.error("❌ Failed to fetch course summary:", err);
+        throw err;
+    }
+};

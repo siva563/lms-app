@@ -2,66 +2,144 @@ const Attendance = require("../models/Attendance");
 const User = require("../models/User");
 const Batch = require("../models/Batch");
 
+// exports.markLoginTime = async (req, res) => {
+//     try {
+//         const studentId = req.user._id;
+//         const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+//         const { latitude, longitude } = req.body;
+
+//         const student = await User.findById(studentId);
+//         if (!student || student.role !== "student") {
+//             return res.status(403).json({ message: "Access denied." });
+//         }
+
+//         const existing = await Attendance.findOne({ studentId, date: today });
+//         if (existing) {
+//             return res.status(400).json({ message: "Attendance already marked today." });
+//         }
+
+//         const attendance = new Attendance({
+//             studentId,
+//             batchId: student.batchId,
+//             date: today,
+//             loginTime: new Date(),
+//             location: { latitude, longitude },
+//         });
+
+//         await attendance.save();
+//         res.json({ message: "✅ Login time marked successfully." });
+
+//     } catch (err) {
+//         console.error("Error in markLoginTime:", err);
+//         res.status(500).json({ message: "Server error" });
+//     }
+// };
+
+// controllers/attendanceController.js
+
 exports.markLoginTime = async (req, res) => {
     try {
         const studentId = req.user._id;
+        const batchId = req.user.batchId;
+
         const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-        const { latitude, longitude } = req.body;
 
-        const student = await User.findById(studentId);
-        if (!student || student.role !== "student") {
-            return res.status(403).json({ message: "Access denied." });
+        let attendance = await Attendance.findOne({ studentId, date: today });
+
+        if (!attendance) {
+            attendance = new Attendance({
+                studentId,
+                batchId,
+                date: today,
+                loginTime: new Date(),
+            });
+        } else {
+            attendance.loginTime = new Date();
         }
-
-        const existing = await Attendance.findOne({ studentId, date: today });
-        if (existing) {
-            return res.status(400).json({ message: "Attendance already marked today." });
-        }
-
-        const attendance = new Attendance({
-            studentId,
-            batchId: student.batchId,
-            date: today,
-            loginTime: new Date(),
-            location: { latitude, longitude },
-        });
 
         await attendance.save();
-        res.json({ message: "✅ Login time marked successfully." });
-
+        res.json({ message: "Login time marked ✅", loginTime: attendance.loginTime });
     } catch (err) {
-        console.error("Error in markLoginTime:", err);
+        console.error("Error marking login:", err);
         res.status(500).json({ message: "Server error" });
     }
 };
+
+
+// exports.markLogoutTime = async (req, res) => {
+//     try {
+//         const studentId = req.user._id;
+//         const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+//         const record = await Attendance.findOne({ studentId, date: today });
+//         if (!record) {
+//             return res.status(404).json({ message: "No login record found for today." });
+//         }
+
+//         if (record.logoutTime) {
+//             return res.status(400).json({ message: "Logout already marked." });
+//         }
+
+//         const logoutTime = new Date();
+//         const duration = Math.round((logoutTime - record.loginTime) / (1000 * 60)); // in minutes
+
+//         record.logoutTime = logoutTime;
+//         record.durationMinutes = duration;
+//         await record.save();
+
+//         res.json({ message: "✅ Logout time marked successfully." });
+//     } catch (err) {
+//         console.error("Error in markLogoutTime:", err);
+//         res.status(500).json({ message: "Server error" });
+//     }
+// };
+
+// controllers/attendanceController.js
 
 exports.markLogoutTime = async (req, res) => {
     try {
         const studentId = req.user._id;
-        const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+        const today = new Date().toISOString().slice(0, 10);
 
-        const record = await Attendance.findOne({ studentId, date: today });
-        if (!record) {
-            return res.status(404).json({ message: "No login record found for today." });
+        const attendance = await Attendance.findOne({ studentId, date: today });
+        if (!attendance) {
+            return res.status(400).json({ message: "No login record found today." });
         }
 
-        if (record.logoutTime) {
-            return res.status(400).json({ message: "Logout already marked." });
+        attendance.logoutTime = new Date();
+
+        // calculate total duration in minutes
+        if (attendance.loginTime && attendance.logoutTime) {
+            const durationMs = attendance.logoutTime - attendance.loginTime;
+            attendance.durationMinutes = Math.floor(durationMs / 60000); // minutes
         }
 
-        const logoutTime = new Date();
-        const duration = Math.round((logoutTime - record.loginTime) / (1000 * 60)); // in minutes
-
-        record.logoutTime = logoutTime;
-        record.durationMinutes = duration;
-        await record.save();
-
-        res.json({ message: "✅ Logout time marked successfully." });
+        await attendance.save();
+        res.json({ message: "Logout time marked ✅", logoutTime: attendance.logoutTime });
     } catch (err) {
-        console.error("Error in markLogoutTime:", err);
+        console.error("Error marking logout:", err);
         res.status(500).json({ message: "Server error" });
     }
 };
+
+exports.getTodayAttendance = async (req, res) => {
+    try {
+        const studentId = req.user._id;
+        const today = new Date().toISOString().slice(0, 10);
+
+        const attendance = await Attendance.findOne({ studentId, date: today });
+
+        if (!attendance) {
+            return res.json({ message: "No attendance marked today yet." });
+        }
+
+        res.json(attendance);
+    } catch (err) {
+        console.error("Error fetching today's attendance:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
 
 exports.getAttendanceReport = async (req, res) => {
     try {
@@ -361,6 +439,70 @@ exports.getCalendarView = async (req, res) => {
         });
     } catch (err) {
         console.error("❌ Error in getCalendarView:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+// controllers/attendanceController.js
+
+
+exports.getCourseSummary = async (req, res) => {
+    try {
+        const studentId = req.user._id;
+        const student = await User.findById(studentId).select("batchId name");
+
+        if (!student || !student.batchId) {
+            return res.status(400).json({ message: "Batch not found for student" });
+        }
+
+        const batch = await Batch.findById(student.batchId).select("startDate endDate");
+
+        if (!batch) {
+            return res.status(400).json({ message: "Batch not found" });
+        }
+
+        const startDate = new Date(batch.startDate);
+        const endDate = new Date(batch.endDate);
+        const today = new Date();
+
+        // Calculate total course days (weekdays only Mon–Fri)
+        let totalDays = 0;
+        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+            if (d.getDay() !== 0 && d.getDay() !== 6) { // Skip Saturday(6) and Sunday(0)
+                totalDays++;
+            }
+        }
+
+        // Fetch present attendance
+        const attendanceRecords = await Attendance.find({
+            studentId,
+            date: { $gte: startDate.toISOString().slice(0, 10), $lte: today.toISOString().slice(0, 10) },
+        });
+
+        const presentDays = attendanceRecords.length;
+
+        // Days completed till now
+        let completedWorkingDays = 0;
+        for (let d = new Date(startDate); d <= today; d.setDate(d.getDate() + 1)) {
+            if (d.getDay() !== 0 && d.getDay() !== 6) {
+                completedWorkingDays++;
+            }
+        }
+
+        const absentDays = completedWorkingDays - presentDays;
+        const futureWorkingDays = totalDays - completedWorkingDays;
+        const daysLeft = futureWorkingDays;
+
+        res.json({
+            studentName: student.name,
+            totalDays,
+            presentDays,
+            absentDays,
+            daysLeft,
+            batchEndDate: batch.endDate,
+        });
+    } catch (err) {
+        console.error("❌ Error in getCourseSummary:", err);
         res.status(500).json({ message: "Server error" });
     }
 };

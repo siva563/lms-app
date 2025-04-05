@@ -17,6 +17,7 @@ import AttendanceReport from "./pages/Admin/AttendanceReport";
 import CandidateDashboard from "./pages/Student/StudentDashboard/CandidateDashboard";
 import FullAttendancePage from "./pages/Student/components/FullAttendancePage";
 import AttendanceDashboard from "./pages/Admin/AttendanceDashboard";
+import StudentProfile from "./pages/Student/components/StudentProfile";
 
 
 function App() {
@@ -40,6 +41,7 @@ function App() {
       <Route path="/candidateboard" element={<CandidateDashboard />} />
       <Route path="/full-attendance" element={<FullAttendancePage />} />
       <Route path="/admin-attendance-dashboard" element={<AttendanceDashboard />} />
+      <Route path="/my-profile" element={<StudentProfile />} />
 
 
 
