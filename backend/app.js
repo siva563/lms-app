@@ -5,7 +5,8 @@ const connectDB = require("./config/db");
 const adminRoutes = require("./routes/adminRoutes");
 const app = express();
 const batchRoutes = require("./routes/batchRoutes");
-const attendanceRoutes = require("./routes/attendanceRoutes")
+const attendanceRoutes = require("./routes/attendanceRoutes");
+const studentRoutes = require("./routes/studentRoutes");
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -25,6 +26,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/courses", require("./routes/courseRoutes"));
 app.use("/api/batches", batchRoutes);
 app.use("/api/attendance", attendanceRoutes);
+app.use("/api/student", studentRoutes);
 
 
 

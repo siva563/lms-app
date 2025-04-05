@@ -1,14 +1,13 @@
 const User = require("../models/User");
 const Batch = require("../models/Batch");
 const Attendance = require("../models/Attendance");
-
 function getWorkingDaysBetween(fromDate, toDate) {
     const day = 1000 * 60 * 60 * 24;
     let count = 0;
     const current = new Date(fromDate);
     while (current <= toDate) {
         const dayOfWeek = current.getDay();
-        if (dayOfWeek !== 0 && dayOfWeek !== 6) count++; // skip Sunday, Saturday
+        if (dayOfWeek !== 0 && dayOfWeek !== 6) count++; // Monday to Friday only
         current.setDate(current.getDate() + 1);
     }
     return count;
@@ -20,7 +19,7 @@ exports.getAttendanceSummary = async (req, res) => {
 
         const institutionId = req.user.institutionId;
 
-        // Filter students
+        // Build student query
         const studentQuery = {
             role: "student",
             institutionId,
@@ -44,23 +43,24 @@ exports.getAttendanceSummary = async (req, res) => {
             });
 
             const presentDays = attendance.length;
+
+            const threshold = student.batchId?.startTime || "09:30"; // ✅ safe chaining
+
             const lateDays = attendance.filter((a) => {
                 if (!a.loginTime) return false;
                 const loginTime = new Date(a.loginTime).toTimeString().slice(0, 5);
-                const threshold = student.batchId.startTime || "09:30";
                 return loginTime > threshold;
             }).length;
 
             const totalWorkingDays = getWorkingDaysBetween(fromDate, toDate);
             const absentDays = totalWorkingDays - presentDays;
-
             const percentage = totalWorkingDays === 0 ? 0 : ((presentDays / totalWorkingDays) * 100).toFixed(1);
 
             result.push({
                 studentId: student._id,
                 name: student.name,
-                batchId: student.batchId._id,
-                batchName: student.batchId.name,
+                batchId: student.batchId?._id || null,
+                batchName: student.batchId?.name || "No Batch Assigned",
                 totalWorkingDays,
                 presentDays,
                 lateDays,
@@ -75,3 +75,4 @@ exports.getAttendanceSummary = async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 };
+

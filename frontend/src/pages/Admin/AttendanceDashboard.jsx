@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { fetchBatches } from "../../services/batchService";
 import { fetchStudents } from "../../services/userService";
 import { fetchAttendanceSummary } from "../../services/adminAttendanceService";
+import { useNavigate } from "react-router-dom";
 
 const AttendanceDashboard = () => {
     const [batches, setBatches] = useState([]);
@@ -12,7 +13,7 @@ const AttendanceDashboard = () => {
     const [filter, setFilter] = useState("7days");
     const [from, setFrom] = useState("");
     const [to, setTo] = useState("");
-
+    const navigate = useNavigate();
     useEffect(() => {
         const loadData = async () => {
             const batchList = await fetchBatches();
@@ -58,6 +59,10 @@ const AttendanceDashboard = () => {
     return (
         <div className="container py-4">
             <h3 className="mb-4">Admin Attendance Dashboard</h3>
+
+            <button className="btn btn-outline-primary mb-3" onClick={() => navigate("/admin")}>
+                ← Back to Dashboard
+            </button>
 
             <div className="row mb-3">
                 <div className="col-md-3">

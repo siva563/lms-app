@@ -1,167 +1,180 @@
 import React, { useEffect, useState } from "react";
-import { markLoginAPI, markLogoutAPI, getAttendanceSummary, markOnlineAPI, fetchBatchDaysFromService } from "../services/attendanceService";
+import { markLoginAPI, markLogoutAPI, markOnlineAPI, fetchTodayAttendanceAPI, fetchCourseSummaryAPI } from "../services/attendanceService";
+import { fetchStudentProfile } from "../services/studentService";
 import { Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const centerTextPlugin = {
-  id: 'centerText',
-  beforeDraw(chart) {
-    const { width } = chart;
-    const { ctx } = chart;
-    const total = chart.config.data.datasets[0].data.reduce((a, b) => a + b, 0);
-    const present = chart.config.data.datasets[0].data[0];
-    const text = `${present}/${total}`;
-
-    ctx.save();
-    const fontSize = (width / 100).toFixed(2);
-    ctx.font = `${fontSize}em sans-serif`;
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#000';
-    const textX = Math.round((chart.width - ctx.measureText(text).width) / 2);
-    const textY = chart._metasets[0].data[0].y;
-    ctx.fillText(text, textX, textY);
-    ctx.restore();
-  }
-};
-
-ChartJS.register(centerTextPlugin);
-
 const EnhancedAttendanceCard = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(false);
-  const [timestamp, setTimestamp] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [duration, setDuration] = useState("00:00:00");
-  const [attendanceStats, setAttendanceStats] = useState({ totalDays: 0, totalPresent: 0 });
-  const [totalBatchDays, setTotalBatchDays] = useState(0);
-
-  const today = new Date().toISOString().slice(0, 10);
+  const [todayAttendance, setTodayAttendance] = useState({});
+  const [courseSummary, setCourseSummary] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState({ name: "Student" }); // Dummy now
 
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("attendanceStatus")) || {};
-    if (stored.date === today) {
-      setIsLoggedIn(stored.status === "in");
-      setIsCompleted(stored.completed);
-      setTimestamp(stored.timestamp);
-    }
-    fetchBatchDays();
-    fetchAttendanceStats();
+    fetchAttendanceData();
+    fetchStudentData();
+    const interval = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(interval);
   }, []);
 
-  const fetchBatchDays = async () => {
+  const fetchAttendanceData = async () => {
     try {
-      const total = await fetchBatchDaysFromService();
-      setTotalBatchDays(total);
+      const today = await fetchTodayAttendanceAPI();
+      const course = await fetchCourseSummaryAPI();
+      console.log("course" + JSON.stringify(course));
+      setTodayAttendance(today);
+      setCourseSummary(course);
     } catch (err) {
-      console.error("Error fetching batch days:", err);
+      console.error("Failed to fetch attendance data:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTime(new Date());
-      if (isLoggedIn && timestamp) {
-        const diff = new Date() - new Date(`1970-01-01T${timestamp}`);
-        const hours = String(Math.floor(diff / 3600000)).padStart(2, '0');
-        const mins = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
-        const secs = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
-        setDuration(`${hours}:${mins}:${secs}`);
-      }
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [isLoggedIn, timestamp]);
-
-  const fetchAttendanceStats = async () => {
-    const currentMonth = new Date().toISOString().slice(0, 7);
-    const stats = await getAttendanceSummary({ month: currentMonth });
-    setAttendanceStats(stats);
+  const fetchStudentData = async () => {
+    try {
+      const student = await fetchStudentProfile();
+      setProfile(student);
+    } catch (err) {
+      console.error("Failed to fetch student data:", err);
+    }
   };
 
-  const handleMark = async () => {
-    if (!navigator.geolocation) return alert("Location not supported");
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      const now = new Date().toLocaleTimeString();
-      if (!isLoggedIn) {
-        await markLoginAPI(pos.coords.latitude, pos.coords.longitude);
-        localStorage.setItem("attendanceStatus", JSON.stringify({ date: today, status: "in", timestamp: now, completed: false }));
-        setIsLoggedIn(true);
-        setTimestamp(now);
-      } else {
-        await markLogoutAPI();
-        localStorage.setItem("attendanceStatus", JSON.stringify({ date: today, status: "out", timestamp: now, completed: true }));
-        setIsLoggedIn(false);
-        setIsCompleted(true);
-        setTimestamp(now);
-      }
-    });
+  const handleMarkLogin = async () => {
+    await markLoginAPI();
+    await fetchAttendanceData();
   };
 
-  const handleOnline = async () => {
+  const handleMarkLogout = async () => {
+    await markLogoutAPI();
+    await fetchAttendanceData();
+  };
+
+  const handleMarkOnline = async () => {
     await markOnlineAPI();
-    alert("Online attendance marked ✅");
-    setIsCompleted(true);
-    fetchAttendanceStats();
+    await fetchAttendanceData();
   };
+
+  const calculateDuration = (loginTime, logoutTime) => {
+    if (!loginTime || !logoutTime) return "—";
+    const start = new Date(loginTime);
+    const end = new Date(logoutTime);
+    const diff = end - start;
+    if (diff < 0) return "—";
+    const hours = String(Math.floor(diff / 3600000)).padStart(2, "0");
+    const mins = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
+    const secs = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
+    return `${hours}:${mins}:${secs}`;
+  };
+
+  const isLoggedIn = todayAttendance.loginTime && !todayAttendance.logoutTime;
+  const isCompleted = todayAttendance.loginTime && todayAttendance.logoutTime;
+  const isOnline = todayAttendance?.status === "Online";
+
+  if (loading || !courseSummary) return <div>Loading...</div>;
+
+  const { totalDays, presentDays, absentDays, daysLeft } = courseSummary;
 
   const donutData = {
-    labels: ["Present", "Absent"],
+    labels: ["Present", "Absent", "Remaining"],
     datasets: [
       {
-        data: [attendanceStats.totalPresent, totalBatchDays - attendanceStats.totalPresent],
-        backgroundColor: ["#28a745", "#dee2e6"],
+        data: [presentDays, absentDays, daysLeft],
+        backgroundColor: ["#28a745", "#dc3545", "#ffc107"],
         borderWidth: 1,
-        cutout: "75%"
       },
     ],
   };
 
   const donutOptions = {
-    plugins: {
-      tooltip: { enabled: true },
-      legend: { display: false }
-    },
-    cutout: '75%',
+    plugins: { legend: { display: false } },
+    cutout: "75%",
     maintainAspectRatio: false,
   };
 
   return (
-    <div className="row g-3">
-      <div className="col-md-4">
-        <div className="card shadow-sm p-2 text-center" style={{ fontSize: "0.85rem", height: "100%" }}>
-          <h6 className="mb-2">📊 Attendance</h6>
-          <div style={{ width: "100px", height: "100px", margin: "0 auto" }}>
-            <Doughnut data={donutData} options={donutOptions} />
+    <div className="container">
+      <div className="row g-4 align-items-stretch">
+
+        {/* 1️⃣ Greeting Card */}
+        <div className="col-lg-3 col-md-6">
+          <div className="card shadow-sm text-center p-3 h-100">
+            <h5>Hello 👋, {profile.name}</h5>
+            <p className="text-muted small">How are you doing?<br />Ready for Today?</p>
           </div>
         </div>
-      </div>
-      <div className="col-md-4">
-        <div className="card shadow-sm p-2" style={{ fontSize: "0.85rem", height: "100%" }}>
-          <h6 className="text-center mb-2">🕒 Time Details</h6>
-          <p className="mb-1">Current: <strong>{currentTime.toLocaleTimeString()}</strong></p>
-          {isLoggedIn && <p className="text-success">Inside: <strong>{duration}</strong></p>}
-          {!isLoggedIn && isCompleted && timestamp && <p className="text-secondary">Out at: <strong>{timestamp}</strong></p>}
+
+        {/* 2️⃣ Course Progress Graph */}
+        <div className="col-lg-3 col-md-6">
+          <div className="card shadow-sm p-3 text-center h-100">
+            <h6>📊 Course Progress</h6>
+            <div style={{ width: "100px", height: "100px", margin: "0 auto" }}>
+              <Doughnut data={donutData} options={donutOptions} />
+            </div>
+            <div className="mt-2" style={{ fontSize: "0.8rem" }}>
+              {presentDays} Present / {totalDays} Days
+            </div>
+          </div>
         </div>
-      </div>
-      <div className="col-md-4">
-        <div className="card shadow-sm p-2 text-center" style={{ fontSize: "0.85rem", height: "100%" }}>
-          <h6 className="mb-2">🎯 Actions</h6>
-          <button
-            className={`btn btn-sm ${isLoggedIn ? "btn-danger" : "btn-success"} w-100 mb-2`}
-            onClick={handleMark}
-            disabled={isCompleted}
-          >
-            {isLoggedIn ? "🚪 Clock Out" : "✅ Clock In"}
-          </button>
-          <button
-            className="btn btn-sm btn-outline-info w-100"
-            onClick={handleOnline}
-            disabled={isCompleted}
-          >
-            🌐 Online
-          </button>
+
+        {/* 3️⃣ Time Details Card */}
+        <div className="col-lg-3 col-md-6">
+          <div className="card shadow-sm p-3 h-100">
+            <h6 className="text-center">🕒 Today's Time</h6>
+            <table className="table table-sm table-borderless mb-0">
+              <tbody>
+                <tr>
+                  <td>Current:</td>
+                  <td><strong>{currentTime.toLocaleTimeString()}</strong></td>
+                </tr>
+                <tr>
+                  <td>In-Time:</td>
+                  <td><strong>{todayAttendance.loginTime ? new Date(todayAttendance.loginTime).toLocaleTimeString() : "—"}</strong></td>
+                </tr>
+                <tr>
+                  <td>Out-Time:</td>
+                  <td><strong>{todayAttendance.logoutTime ? new Date(todayAttendance.logoutTime).toLocaleTimeString() : "—"}</strong></td>
+                </tr>
+                <tr>
+                  <td>Spent:</td>
+                  <td><strong>{calculateDuration(todayAttendance.loginTime, todayAttendance.logoutTime)}</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
+
+        {/* 4️⃣ Actions Card */}
+        <div className="col-lg-3 col-md-6">
+          <div className="card shadow-sm p-3 text-center h-100">
+            <h6>🎯 Mark Attendance</h6>
+            {!todayAttendance.loginTime && (
+              <button className="btn btn-sm btn-success w-100 mb-2" onClick={handleMarkLogin}>
+                ✅ Clock In
+              </button>
+            )}
+            {isLoggedIn && (
+              <button className="btn btn-sm btn-danger w-100 mb-2" onClick={handleMarkLogout}>
+                🚪 Clock Out
+              </button>
+            )}
+            {!isCompleted && !isLoggedIn && (
+              <button className="btn btn-sm btn-outline-info w-100 mb-2" onClick={handleMarkOnline}>
+                🌐 Attend Online
+              </button>
+            )}
+            {isCompleted && (
+              <div className="text-success small mt-2">Attendance Completed ✅</div>
+            )}
+            {isOnline && (
+              <div className="text-info small mt-2">You're Online 🌐</div>
+            )}
+          </div>
+        </div>
+
       </div>
     </div>
   );
