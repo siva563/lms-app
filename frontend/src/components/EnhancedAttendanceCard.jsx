@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { markLoginAPI, markLogoutAPI, markOnlineAPI, fetchTodayAttendanceAPI, fetchCourseSummaryAPI } from "../services/attendanceService";
 import { fetchStudentProfile } from "../services/studentService";
 import { Doughnut } from "react-chartjs-2";
@@ -11,7 +12,9 @@ const EnhancedAttendanceCard = () => {
   const [todayAttendance, setTodayAttendance] = useState({});
   const [courseSummary, setCourseSummary] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState({ name: "Student" }); // Dummy now
+  const [profile, setProfile] = useState({ name: "Student" }); // Dummy default
+
+  const navigate = useNavigate(); // ✅ Router navigation
 
   useEffect(() => {
     fetchAttendanceData();
@@ -24,7 +27,6 @@ const EnhancedAttendanceCard = () => {
     try {
       const today = await fetchTodayAttendanceAPI();
       const course = await fetchCourseSummaryAPI();
-      console.log("course" + JSON.stringify(course));
       setTodayAttendance(today);
       setCourseSummary(course);
     } catch (err) {
@@ -83,7 +85,7 @@ const EnhancedAttendanceCard = () => {
     datasets: [
       {
         data: [presentDays, absentDays, daysLeft],
-        backgroundColor: ["#28a745", "#dc3545", "#ffc107"],
+        backgroundColor: ["#28a745", "#dc3545", "#a8a8a7"],
         borderWidth: 1,
       },
     ],
@@ -110,13 +112,19 @@ const EnhancedAttendanceCard = () => {
         {/* 2️⃣ Course Progress Graph */}
         <div className="col-lg-3 col-md-6">
           <div className="card shadow-sm p-3 text-center h-100">
-            <h6>📊 Course Progress</h6>
+            <h6>📊 Attendance Progress</h6>
             <div style={{ width: "100px", height: "100px", margin: "0 auto" }}>
               <Doughnut data={donutData} options={donutOptions} />
             </div>
             <div className="mt-2" style={{ fontSize: "0.8rem" }}>
               {presentDays} Present / {totalDays} Days
             </div>
+            <button
+              className="btn btn-sm btn-outline-primary mt-3"
+              onClick={() => navigate(`/attendance/${profile._id}`)}
+            >
+              📋 View Attendance
+            </button>
           </div>
         </div>
 
@@ -176,6 +184,14 @@ const EnhancedAttendanceCard = () => {
         </div>
 
       </div>
+
+      {/* 📄 View Full Attendance Button */}
+      {/* <div className="text-center mt-4">
+        <button className="btn btn-outline-primary" onClick={() => navigate(`/attendance/${profile._id}`)}>
+          📄 View My Full Attendance
+        </button>
+      </div> */}
+
     </div>
   );
 };

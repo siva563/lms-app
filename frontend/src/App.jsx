@@ -18,6 +18,8 @@ import CandidateDashboard from "./pages/Student/StudentDashboard/CandidateDashbo
 import FullAttendancePage from "./pages/Student/components/FullAttendancePage";
 import AttendanceDashboard from "./pages/Admin/AttendanceDashboard";
 import StudentProfile from "./pages/Student/components/StudentProfile";
+import StudentAttendanceDetails from "./pages/Admin/StudentAttendanceDetails";
+import ChapterManager from "./pages/Admin/ChapterManager";
 
 
 function App() {
@@ -31,7 +33,7 @@ function App() {
       <Route path="/admin/subjects" element={<Subjects />} />
       <Route path="/instructor/upload-quiz" element={<UploadQuiz />} />
       <Route path="/instructor/create-exam" element={<CreateExam />} />
-      <Route path="/student/dashboard" element={<StudentDashboard />} />
+      <Route path="/student/dashboard" element={<CandidateDashboard />} />
       <Route path="/admin/exam-analytics" element={<AdminExamAnalytics />} />
       <Route path="/admin/users" element={<AdminUserList />} />
       <Route path="/admin/courses" element={<AdminCourseManager />} />
@@ -42,6 +44,8 @@ function App() {
       <Route path="/full-attendance" element={<FullAttendancePage />} />
       <Route path="/admin-attendance-dashboard" element={<AttendanceDashboard />} />
       <Route path="/my-profile" element={<StudentProfile />} />
+      <Route path="attendance/:studentId" element={< StudentAttendanceDetails />} />
+      <Route path="/chapter" element={< ChapterManager />} />
 
 
 

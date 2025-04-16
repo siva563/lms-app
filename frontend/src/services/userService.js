@@ -39,7 +39,7 @@ export const fetchStudents = async () => {
    // const token = getToken();
     try {
         const token = localStorage.getItem("token");
-        const res = await axios.get(`${API}/students`, {
+        const res = await axios.get(`${API}/users/students`, {
             headers: { Authorization: `Bearer ${token}` },
         });
         return res.data;

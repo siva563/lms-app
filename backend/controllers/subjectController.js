@@ -2,43 +2,63 @@ const Subject = require("../models/Subject");
 
 exports.createSubject = async (req, res) => {
     try {
-        const { name, institutionId } = req.body;
-        const subject = await Subject.create({ name, institutionId });
+        const { name, description } = req.body;
+
+        const subject = new Subject({
+            name,
+            description,
+            institutionId: req.user.institutionId, // ✅ From decoded token
+            createdBy: req.user._id,               // ✅ Also from token
+        });
+
+        await subject.save();
         res.status(201).json(subject);
     } catch (err) {
-        console.error("Create Subject:", err);
-        res.status(500).json({ message: "Failed to create subject" });
+        console.error("Create Subject Error:", err);
+        res.status(400).json({ message: "Failed to create subject", error: err.message });
     }
 };
-
+// Get All
 exports.getSubjects = async (req, res) => {
     try {
-        const { institutionId } = req.query;
-        const subjects = await Subject.find({ institutionId }).sort({ createdAt: -1 });
+        const institutionId = req.user.institutionId;
+        const subjects = await Subject.find({ institutionId });
         res.json(subjects);
     } catch (err) {
-        res.status(500).json({ message: "Failed to fetch subjects" });
+        console.error("❌ Error fetching subjects:", err);
+        res.status(500).json({ message: "Server error" });
     }
 };
 
-exports.deleteSubject = async (req, res) => {
+// Get By ID
+exports.getSubjectById = async (req, res) => {
     try {
-        await Subject.findByIdAndDelete(req.params.id);
-        res.json({ message: "Deleted" });
+        const subject = await Subject.findById(req.params.id);
+        if (!subject) return res.status(404).json({ message: "Not found" });
+        res.json(subject);
     } catch (err) {
-        res.status(500).json({ message: "Delete failed" });
+        res.status(500).json({ message: "Server error" });
     }
 };
 
+// Update
 exports.updateSubject = async (req, res) => {
     try {
-        const updated = await Subject.findByIdAndUpdate(
-            req.params.id,
-            { name: req.body.name },
-            { new: true }
-        );
-        res.json(updated);
+        const subject = await Subject.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!subject) return res.status(404).json({ message: "Not found" });
+        res.json(subject);
     } catch (err) {
-        res.status(500).json({ message: "Update failed" });
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+// Delete
+exports.deleteSubject = async (req, res) => {
+    try {
+        const subject = await Subject.findByIdAndDelete(req.params.id);
+        if (!subject) return res.status(404).json({ message: "Not found" });
+        res.json({ message: "Deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ message: "Server error" });
     }
 };
