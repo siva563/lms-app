@@ -16,12 +16,14 @@
 const express = require("express");
 const router = express.Router();
 const auth = require("../middleware/auth");
+const { isAdmin } = require("../middleware/roleMiddleware");
 const {
     createSubject,
     getSubjects,
     getSubjectById,
     updateSubject,
     deleteSubject,
+    assignSubjectToStudents
 } = require("../controllers/subjectController");
 
 router.use(auth); // 🔒 Authenticated routes only
@@ -31,5 +33,7 @@ router.get("/", getSubjects);
 router.get("/:id", getSubjectById);
 router.put("/:id", updateSubject);
 router.delete("/:id", deleteSubject);
+router.post("/assign", auth, isAdmin, assignSubjectToStudents);
+
 
 module.exports = router;

@@ -28,7 +28,7 @@ const CandidateDashboard = () => {
     return (
         <div>
             {/* Top Navigation Bar */}
-            <TopNavbar studentName={user?.name || "Student"} />
+            {/* <TopNavbar studentName={user?.name || "Student"} /> */}
 
             {/* Main Dashboard Content */}
             <div className="container mt-4">

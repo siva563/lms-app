@@ -7,6 +7,8 @@ const app = express();
 const batchRoutes = require("./routes/batchRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
 const studentRoutes = require("./routes/studentRoutes");
+const quizSuggest = require("./routes/quizSuggest");
+const questionBankRoutes = require("./routes/questionBankRoutes");
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -27,7 +29,8 @@ app.use("/api/courses", require("./routes/courseRoutes"));
 app.use("/api/batches", batchRoutes);
 app.use("/api/attendance", attendanceRoutes);
 app.use("/api/student", studentRoutes);
-
+app.use("/api/quiz", quizSuggest);
+app.use("/api/question-bank", questionBankRoutes);
 
 
 module.exports = app;

@@ -1,12 +1,27 @@
 const express = require("express");
 const router = express.Router();
-const auth = require("../middleware/auth");
-const roleCheck = require("../middleware/roleCheck");
+const quizController = require("../controllers/quizController");
 
-const { uploadQuizBatch,getFilteredQuizzes} = require("../controllers/quizController");
+// 🔗 Base path: /api/quiz
 
-// Only instructors (or superadmin) can upload
-router.post("/bulk", auth, roleCheck(["instructor", "superadmin"]), uploadQuizBatch);
-router.get("/", getFilteredQuizzes); 
+// Create a new quiz
+router.post("/", quizController.createQuiz);
+
+// Get all quizzes (filter by institutionId, subjectId, chapterId via query)
+router.get("/", quizController.getAllQuizzes);
+
+// Get single quiz by ID
+router.get("/:id", quizController.getQuizById);
+
+// Update quiz by ID
+router.put("/:id", quizController.updateQuiz);
+
+// Delete quiz by ID
+router.delete("/:id", quizController.deleteQuiz);
+
+router.post("/save-bulk", quizController.saveBulkQuiz); 
+
+router.post("/save-with-questions", quizController.saveQuizWithQuestions);
+router.post("/submit", quizController.submitQuizAttempt);
 
 module.exports = router;

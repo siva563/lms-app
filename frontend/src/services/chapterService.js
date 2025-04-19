@@ -79,3 +79,8 @@ export const deleteChapter = async (id) => {
     const res = await axios.delete(`${API}/${id}`, getAuthHeaders());
     return res.data;
 };
+
+export const fetchChaptersBySubject = async (id) => {
+    const res = await axios.get(`${API}/${id}`, getAuthHeaders());
+    return res.data;
+};

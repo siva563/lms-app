@@ -73,10 +73,25 @@ export const deleteSubject = async (id) => {
 //fetchSubjects
 
 export const fetchSubjects = async () => {
-    const token = localStorage.getItem("token");
-    const res = await axios.get(API, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return res.data;
-  };
-  
+  const token = localStorage.getItem("token");
+  const res = await axios.get(API, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data;
+};
+
+export const assignSubjectToStudents = async (subjectId, studentIds) => {
+  const token = localStorage.getItem("token");
+  const res = await axios.post(`${API}/assign`,
+    {
+      subjectId,
+      studentIds,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return res.data;
+};

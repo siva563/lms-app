@@ -180,110 +180,200 @@
 // export default Subjects;
 
 import React, { useEffect, useState } from "react";
-import { createSubject, deleteSubject, getSubjects, updateSubject } from "../../services/subjectService";
+import {
+  createSubject,
+  deleteSubject,
+  getSubjects,
+  updateSubject,
+  assignSubjectToStudents,
+} from "../../services/subjectService";
+import { fetchStudents } from "../../services/userService";
 
 const SubjectManager = () => {
-    const [subjects, setSubjects] = useState([]);
-    const [form, setForm] = useState({ name: "", description: "" });
-    const [editId, setEditId] = useState(null);
+  const [subjects, setSubjects] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [form, setForm] = useState({ name: "", description: "" });
+  const [editId, setEditId] = useState(null);
 
-    useEffect(() => {
-        fetchSubjects();
-    }, []);
+  const [selectedSubjectId, setSelectedSubjectId] = useState("");
+  const [selectedStudentIds, setSelectedStudentIds] = useState([]);
 
-    const fetchSubjects = async () => {
-        const data = await getSubjects();
-        setSubjects(data);
-    };
+  useEffect(() => {
+    fetchSubjects();
+    fetchAllStudents();
+  }, []);
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setForm((prev) => ({ ...prev, [name]: value }));
-    };
+  const fetchSubjects = async () => {
+    const data = await getSubjects();
+    setSubjects(data);
+  };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (editId) {
-            await updateSubject(editId, form);
-        } else {
-            await createSubject(form);
-        }
-        setForm({ name: "", description: "" });
-        setEditId(null);
-        fetchSubjects();
-    };
+  const fetchAllStudents = async () => {
+    const data = await fetchStudents("student");
+    setStudents(data);
+  };
 
-    const handleEdit = (subject) => {
-        setForm({ name: subject.name, description: subject.description });
-        setEditId(subject._id);
-    };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
 
-    const handleDelete = async (id) => {
-        if (window.confirm("Are you sure you want to delete this subject?")) {
-            await deleteSubject(id);
-            fetchSubjects();
-        }
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (editId) {
+      await updateSubject(editId, form);
+    } else {
+      await createSubject(form);
+    }
+    setForm({ name: "", description: "" });
+    setEditId(null);
+    fetchSubjects();
+  };
 
-    return (
-        <div className="container py-4">
-            <h3>Subject Management</h3>
-            <form onSubmit={handleSubmit} className="row g-3 mb-4">
-                <div className="col-md-4">
-                    <input
-                        type="text"
-                        name="name"
-                        className="form-control"
-                        placeholder="Subject Name"
-                        value={form.name}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
-                <div className="col-md-6">
-                    <input
-                        type="text"
-                        name="description"
-                        className="form-control"
-                        placeholder="Description"
-                        value={form.description}
-                        onChange={handleChange}
-                    />
-                </div>
-                <div className="col-md-2">
-                    <button type="submit" className="btn btn-primary w-100">
-                        {editId ? "Update" : "Add"}
-                    </button>
-                </div>
-            </form>
+  const handleEdit = (subject) => {
+    setForm({ name: subject.name, description: subject.description });
+    setEditId(subject._id);
+  };
 
-            <table className="table table-bordered">
-                <thead className="table-light">
-                    <tr>
-                        <th>Name</th>
-                        <th>Description</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {subjects.map((subject) => (
-                        <tr key={subject._id}>
-                            <td>{subject.name}</td>
-                            <td>{subject.description}</td>
-                            <td>
-                                <button className="btn btn-sm btn-warning me-2" onClick={() => handleEdit(subject)}>
-                                    ✏️ Edit
-                                </button>
-                                <button className="btn btn-sm btn-danger" onClick={() => handleDelete(subject._id)}>
-                                    🗑️ Delete
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this subject?")) {
+      await deleteSubject(id);
+      fetchSubjects();
+    }
+  };
+
+  const handleAssignSubject = async () => {
+    try {
+      if (!selectedSubjectId || selectedStudentIds.length === 0) {
+        alert("Please select both subject and students.");
+        return;
+      }
+
+      await assignSubjectToStudents(selectedSubjectId, selectedStudentIds);
+      alert("✅ Subject assigned successfully!");
+      setSelectedStudentIds([]);
+      setSelectedSubjectId("");
+    } catch (err) {
+      console.error("❌ Failed to assign subject:", err);
+      alert("Something went wrong while assigning subject.");
+    }
+  };
+
+  return (
+    <div className="container py-4">
+      <h3 className="mb-3">📚 Subject Management</h3>
+
+      <form onSubmit={handleSubmit} className="row g-3 mb-4">
+        <div className="col-md-4">
+          <input
+            type="text"
+            name="name"
+            className="form-control"
+            placeholder="Subject Name"
+            value={form.name}
+            onChange={handleChange}
+            required
+          />
         </div>
-    );
+        <div className="col-md-6">
+          <input
+            type="text"
+            name="description"
+            className="form-control"
+            placeholder="Description"
+            value={form.description}
+            onChange={handleChange}
+          />
+        </div>
+        <div className="col-md-2">
+          <button type="submit" className="btn btn-primary w-100">
+            {editId ? "Update" : "Add"}
+          </button>
+        </div>
+      </form>
+
+      {/* Subject Assignment Section */}
+      <div className="card p-3 mb-4">
+        <h5>🎯 Assign Subject to Students</h5>
+        <div className="row g-2">
+          <div className="col-md-5">
+            <label className="form-label">Select Subject</label>
+            <select
+              className="form-select"
+              value={selectedSubjectId}
+              onChange={(e) => setSelectedSubjectId(e.target.value)}
+            >
+              <option value="">-- Select Subject --</option>
+              {subjects.map((subj) => (
+                <option key={subj._id} value={subj._id}>
+                  {subj.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="col-md-5">
+            <label className="form-label">Select Students</label>
+            <select
+              multiple
+              className="form-select"
+              value={selectedStudentIds}
+              onChange={(e) =>
+                setSelectedStudentIds(
+                  Array.from(e.target.selectedOptions, (opt) => opt.value)
+                )
+              }
+            >
+              {students.map((stu) => (
+                <option key={stu._id} value={stu._id}>
+                  {stu.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="col-md-2 d-flex align-items-end">
+            <button className="btn btn-success w-100" onClick={handleAssignSubject}>
+              Assign
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Subjects Table */}
+      <table className="table table-bordered">
+        <thead className="table-light">
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {subjects.map((subject) => (
+            <tr key={subject._id}>
+              <td>{subject.name}</td>
+              <td>{subject.description}</td>
+              <td>
+                <button
+                  className="btn btn-sm btn-warning me-2"
+                  onClick={() => handleEdit(subject)}
+                >
+                  ✏️ Edit
+                </button>
+                <button
+                  className="btn btn-sm btn-danger"
+                  onClick={() => handleDelete(subject._id)}
+                >
+                  🗑️ Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 };
 
 export default SubjectManager;

@@ -1,4 +1,7 @@
 const Subject = require("../models/Subject");
+const SubjectAssignment = require("../models/subjectAssignmentModel");
+//const SubjectAssignment = require("../models/subjectAssignmentModel");
+const User = require("../models/User");
 
 exports.createSubject = async (req, res) => {
     try {
@@ -62,3 +65,91 @@ exports.deleteSubject = async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 };
+
+// controllers/subjectController.js
+// exports.assignSubjectToStudents = async (req, res) => {
+//     try {
+//         const { subjectId, studentIds } = req.body;
+
+//         if (!subjectId || !studentIds || !Array.isArray(studentIds)) {
+//             return res.status(400).json({ message: "Invalid input" });
+//         }
+
+//         const subject = await Subject.findById(subjectId);
+//         if (!subject) return res.status(404).json({ message: "Subject not found" });
+
+//         // Merge and deduplicate student IDs
+//         const uniqueAssignments = [...new Set([...subject.assignedTo.map(id => id.toString()), ...studentIds])];
+
+//         subject.assignedTo = uniqueAssignments;
+//         await subject.save();
+
+//         res.json({ message: "✅ Subject assigned successfully" });
+//     } catch (err) {
+//         console.error("❌ Error assigning subject:", err);
+//         res.status(500).json({ message: "Server error" });
+//     }
+// };
+
+// exports.assignSubjectToStudents = async (req, res) => {
+//     try {
+//         const { subjectId, studentIds } = req.body;
+
+//         if (!subjectId || !studentIds || studentIds.length === 0) {
+//             return res.status(400).json({ message: "Missing subject or students." });
+//         }
+
+//         const assignments = studentIds.map((studentId) => ({
+//             subjectId,
+//             studentId,
+//             createdBy: req.user._id, // ✅ Add this
+//             institutionId: req.user.institutionId, // ✅ Also add this if required
+//         }));
+
+//         await SubjectAssignment.insertMany(assignments);
+
+//         res.status(201).json({ message: "Subject assigned successfully." });
+//     } catch (err) {
+//         console.error("Error assigning subject:", err);
+//         res.status(500).json({ message: "Failed to assign subject." });
+//     }
+// };
+
+
+
+exports.assignSubjectToStudents = async (req, res) => {
+    try {
+        const { subjectId, studentIds } = req.body;
+
+        if (!subjectId || !studentIds || studentIds.length === 0) {
+            return res.status(400).json({ message: "Missing subject or students." });
+        }
+
+        const assignments = studentIds.map((studentId) => ({
+            subjectId,
+            studentId,
+            createdBy: req.user._id,
+            institutionId: req.user.institutionId,
+        }));
+
+        // ✅ Insert assignment entries
+        await SubjectAssignment.insertMany(assignments);
+
+        // ✅ Update each student's assignedSubjects array
+        await Promise.all(
+            studentIds.map((id) =>
+                User.findByIdAndUpdate(
+                    id,
+                    { $addToSet: { assignedSubjects: subjectId } }, // addToSet avoids duplicates
+                    { new: true }
+                )
+            )
+        );
+
+        res.status(201).json({ message: "Subject assigned successfully." });
+    } catch (err) {
+        console.error("❌ Error assigning subject:", err);
+        res.status(500).json({ message: "Failed to assign subject." });
+    }
+};
+

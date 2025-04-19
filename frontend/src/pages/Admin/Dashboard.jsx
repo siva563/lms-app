@@ -118,6 +118,16 @@ const AdminDashboard = () => {
                         <p className="text-muted">View Chapters</p>
                     </div>
                 </div>
+                <div className="col-md-4">
+                    <div
+                        className="card shadow-sm p-3 text-center"
+                        onClick={() => navigate("/create-content")}
+                        style={{ cursor: "pointer" }}
+                    >
+                        <h5>Content Creation </h5>
+                        <p className="text-muted">View Content</p>
+                    </div>
+                </div>
             </div>
         </div>
     );

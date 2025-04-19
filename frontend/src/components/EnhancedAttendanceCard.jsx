@@ -121,7 +121,7 @@ const EnhancedAttendanceCard = () => {
             </div>
             <button
               className="btn btn-sm btn-outline-primary mt-3"
-              onClick={() => navigate(`/attendance/${profile._id}`)}
+              onClick={() => navigate(`/student/attendance/${profile._id}`)}
             >
               📋 View Attendance
             </button>
