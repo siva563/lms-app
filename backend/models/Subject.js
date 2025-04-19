@@ -1,22 +1,11 @@
 const mongoose = require("mongoose");
-
 const subjectSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true,
-    },
-    institutionId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Institution",
-        required: true,
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    },
-});
+    name: { type: String, required: true },
+    description: String,
+    assignedTo: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    institutionId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: "Institution" },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, required: true, ref: "User" },
+    createdAt: { type: Date, default: Date.now },
+  });
 
-module.exports = mongoose.model("Subject", subjectSchema);
-
-
-
+  module.exports = mongoose.model("Subject", subjectSchema);

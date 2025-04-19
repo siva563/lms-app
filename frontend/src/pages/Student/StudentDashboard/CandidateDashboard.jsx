@@ -8,16 +8,27 @@ import ExamStatsCard from "../components/ExamStatsCard";
 import MarkAttendanceButton from "../../../components/MarkAttendanceButton";
 import AttendanceCalendar from "../components/AttendanceCalendar";
 import EnhancedAttendanceCard from "../../../components/EnhancedAttendanceCard";
-
+import { useNavigate } from "react-router-dom";
 const CandidateDashboard = () => {
     const user = getUserData();
     const batchId = user?.batchId;
     console.log("batch id is:" + batchId);
+    const navigate = useNavigate();
+
+
+    const handleViewMyAttendance = () => {
+        const student = JSON.parse(localStorage.getItem("user")); // fetch logged-in student info
+        if (student?._id) {
+            navigate(`/my-attendance/${student._id}`);
+        } else {
+            alert("Student info not found. Please login again.");
+        }
+    };
 
     return (
         <div>
             {/* Top Navigation Bar */}
-            <TopNavbar studentName={user?.name || "Student"} />
+            {/* <TopNavbar studentName={user?.name || "Student"} /> */}
 
             {/* Main Dashboard Content */}
             <div className="container mt-4">

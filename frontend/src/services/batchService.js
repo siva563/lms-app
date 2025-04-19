@@ -7,8 +7,23 @@ const config = {
     headers: { Authorization: `Bearer ${getToken()}` },
 };
 
-export const fetchBatches = () =>
-    axios.get(`${API}/batches`, config).then(res => res.data);
+// export const fetchBatches = () =>
+//     axios.get(`${API}/batches`, config).then(res => res.data);
+
+export const fetchBatches = async () => {
+    try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get(`${API}/batches`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return res.data;
+    } catch (err) {
+        console.error("❌ Failed to fetch batches:", err);
+        throw err;
+    }
+};
 
 export const createBatch = (data) =>
     axios.post(`${API}/batches`, data, config).then(res => res.data);

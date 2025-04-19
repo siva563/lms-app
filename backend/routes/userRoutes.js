@@ -15,12 +15,13 @@ const {
 // ✅ Apply auth & role check to all routes
 router.use(auth, roleCheck(["superadmin", "admin"]));
 
+router.get("/students", getAllStudents);
 router.get("/all", getAllUsers);         // ✅ No need to reapply `auth` here
 router.post("/", createUser);
 router.get("/", getUsers);
 router.get("/:id", getUserById);
 router.put("/:id", updateUser);
 router.delete("/:id", deleteUser);
-router.get("/students", getAllStudents);
+
 
 module.exports = router;

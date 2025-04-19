@@ -30,3 +30,28 @@ export const updateStudentProfile = async (formData) => {
         throw err;
     }
 };
+
+export const fetchAssignedSubjectsWithChapters = async () => {
+    const token = localStorage.getItem("token");
+    const res = await axios.get(`${API}/student/assigned-subjects`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return res.data;
+};
+
+
+export const fetchChaptersBySubject = async (subjectId) => {
+    const token = localStorage.getItem("token");
+
+    try {
+        const res = await axios.get(`${API}/student/chapters/${subjectId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        return res.data;
+    } catch (error) {
+        console.error("❌ Error fetching chapters by subject:", error);
+        throw error; // Optionally rethrow if you want to handle it in the component
+    }
+};
