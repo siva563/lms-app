@@ -22,9 +22,43 @@ const StudentLayout = () => {
     return (
         <div className="d-flex">
             {/* Sidebar */}
-            <div
+            {/* <div
                 className={`bg-success text-white d-flex flex-column p-3 ${collapsed ? "collapsed-sidebar" : ""}`}
                 style={{ minHeight: "100vh", width: collapsed ? "80px" : "250px", transition: "0.3s" }}
+            >
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                    {!collapsed && <h4 className="m-0">CodeBegun</h4>}
+                    <i
+                        className={`bi ${collapsed ? "bi-arrow-bar-right" : "bi-arrow-bar-left"} cursor-pointer`}
+                        onClick={toggleSidebar}
+                        role="button"
+                    ></i>
+                </div>
+
+                <ul className="nav nav-pills flex-column gap-2">
+                    {navItems.map(({ icon, label, path }) => (
+                        <li className="nav-item" key={label}>
+                            <Link
+                                className={`nav-link text-white ${location.pathname === path ? "active bg-dark" : ""}`}
+                                to={path}
+                            >
+                                <i className={`bi ${icon} me-2`}></i> {!collapsed && label}
+                            </Link>
+                        </li>
+                    ))}
+                </ul>
+            </div> */}
+
+            <div
+                className={`bg-success text-white d-flex flex-column p-3 position-sticky`}
+                style={{
+                    top: 0,
+                    height: "100vh",
+                    width: collapsed ? "80px" : "250px",
+                    transition: "0.3s",
+                    overflowY: "auto",
+                    zIndex: 1030
+                }}
             >
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     {!collapsed && <h4 className="m-0">CodeBegun</h4>}

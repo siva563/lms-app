@@ -9,6 +9,8 @@ const attendanceRoutes = require("./routes/attendanceRoutes");
 const studentRoutes = require("./routes/studentRoutes");
 const quizSuggest = require("./routes/quizSuggest");
 const questionBankRoutes = require("./routes/questionBankRoutes");
+const assignmentRoutes = require('./routes/assignmentRoutes');
+const aiRoutes = require('./routes/aiRoutes');
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -31,6 +33,8 @@ app.use("/api/attendance", attendanceRoutes);
 app.use("/api/student", studentRoutes);
 app.use("/api/quiz", quizSuggest);
 app.use("/api/question-bank", questionBankRoutes);
+app.use('/api/assignments', assignmentRoutes);
+app.use('/api/ai', aiRoutes);
 
 
 module.exports = app;

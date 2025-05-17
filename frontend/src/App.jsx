@@ -89,6 +89,7 @@ import StudentProfile from "./pages/Student/components/StudentProfile";
 import FullAttendancePage from "./pages/Student/components/FullAttendancePage";
 import StudentSubjectChapters from "./pages/Student/StudentSubjectChapters";
 import StudentQuizTaking from "./pages/Student/StudentDashboard/StudentQuizTaking";
+import StudentAssignment from "./pages/Student/StudentAssignment";
 
 // NotFound fallback
 //import NotFound from "./components/NotFound"; // Optional 404 component
@@ -135,6 +136,7 @@ const App = () => {
         <Route path="attendance" element={<FullAttendancePage />} />
         <Route path="attendance/:studentId" element={<StudentAttendanceDetails />} />
         <Route path="subjects/:subjectId" element={<StudentSubjectChapters />} />
+        <Route path="assignment/:chapterId" element={<StudentAssignment />} />
         <Route path="quiz/:quizId" element={<StudentQuizTaking />} />
       </Route>
 
