@@ -33,6 +33,7 @@ const ChapterManager = () => {
 
     const loadChapters = async () => {
         const data = await fetchChapters();
+        console.log("chapter data is:" + JSON.stringify(data));
         setChapters(data);
     };
 

@@ -16,7 +16,7 @@ export const getAiQuizSuggestions = async (topic) => {
         console.error("❌ AI Suggestion Error:", err);
         return [];
     }
-}; 
+};
 
 export const saveToQuestionBank = async (topic) => {
     try {
@@ -33,4 +33,15 @@ export const saveToQuestionBank = async (topic) => {
         console.error("❌ AI Suggestion Error:", err);
         return [];
     }
+};
+
+export const evaluateStudentCode = async ({ problemStatement, studentCode, testCases, language }) => {
+    const response = await axios.post(`${API}/ai/evaluate-code`, {
+        problemStatement,
+        studentCode,
+        testCases,
+        language,
+    });
+
+    return response.data;
 };
