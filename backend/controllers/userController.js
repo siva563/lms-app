@@ -96,7 +96,7 @@ exports.createUser = async (req, res) => {
 
       <p style="font-size: 15px; line-height: 1.6;">
         We’re excited to have you on board! You’ve just taken the first step towards becoming a job-ready developer.
-        At CodeBegun, we focus on <strong>real-world projects, AI-powered assessments</strong>, and <strong>placement support</strong> to help you stand out in the tech world.
+        At CodeBegun, we focus on <strong>real-world projects, AI-powered assessments and lot.</strong>, and <strong>placement support</strong> to help you stand out in the tech world.
       </p>
 
       <p style="font-size: 15px; margin-top: 20px;">Set your password now to access your dashboard:</p>
