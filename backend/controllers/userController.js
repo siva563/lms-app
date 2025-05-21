@@ -80,11 +80,71 @@ exports.createUser = async (req, res) => {
     user.resetTokenExpires = resetTokenExpires;
     console.log("user is:" + user);
     const resetLink = `http://192.168.0.109:5173/set-password?token=${resetToken}`;
+    //     const htmlContent = `
+    //   <h3>Hello ${user.name},</h3>
+    //   <p>Welcome to CodeBegun LMS! Click below to set your password:</p>
+    //   <a href="${resetLink}" style="padding:10px 20px; background:#28a745; color:#fff; text-decoration:none;">Set Password</a>
+    //   <p>This link expires in 2 hours.</p>
+    // `;
+
     const htmlContent = `
-  <h3>Hello ${user.name},</h3>
-  <p>Welcome to CodeBegun LMS! Click below to set your password:</p>
-  <a href="${resetLink}" style="padding:10px 20px; background:#28a745; color:#fff; text-decoration:none;">Set Password</a>
-  <p>This link expires in 2 hours.</p>
+  <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+    <div style="max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 8px; padding: 30px; box-shadow: 0 0 10px rgba(0,0,0,0.05);">
+      
+      <h2 style="color: #2e86de;">Hey ${user.name},</h2>
+      <p style="font-size: 16px; font-weight: bold;">🎉 Welcome to the CodeBegun Family!</p>
+
+      <p style="font-size: 15px; line-height: 1.6;">
+        We’re excited to have you on board! You’ve just taken the first step towards becoming a job-ready developer.
+        At CodeBegun, we focus on <strong>real-world projects, AI-powered assessments</strong>, and <strong>placement support</strong> to help you stand out in the tech world.
+      </p>
+
+      <p style="font-size: 15px; margin-top: 20px;">Set your password now to access your dashboard:</p>
+
+      <div style="text-align: center; margin: 25px 0;">
+        <a href="${resetLink}" style="padding: 12px 24px; background-color: #2e86de; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold;">Set My Password</a>
+      </div>
+
+      <p style="font-size: 14px; color: #555;">⚠️ Note: This link will expire in 2 hours for your security.</p>
+
+      <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;" />
+
+      <h3 style="color: #444;">📚 Our Popular Courses:</h3>
+      <ul style="font-size: 14px; line-height: 1.8; color: #333; padding-left: 20px;">
+        <li>Full Stack Java Development</li>
+        <li>Full Stack Python Development</li>
+        <li>.NET Full Stack Development</li>
+        <li>Frontend Development (React.js, Angular)</li>
+        <li>Data Science & Analytics</li>
+        <li>AI-Powered Interview Preparation</li>
+      </ul>
+
+      <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;" />
+
+      <p style="font-size: 15px;">📞 Need help? Call or WhatsApp: <strong>+91 6301099587</strong></p>
+      <p style="font-size: 15px;">🌐 Visit us: <a href="https://codebegun.com" target="_blank" style="color: #2e86de;">www.codebegun.com</a></p>
+
+      <p style="font-size: 14px; margin-top: 10px;">💬 Get instant support: <a href="https://wa.me/916301099587" target="_blank" style="color: #28a745;">Chat on WhatsApp</a></p>
+
+      <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;" />
+
+      <p style="text-align: center;">
+        <a href="https://www.linkedin.com/company/codebegun" target="_blank" style="margin: 0 10px;"><img src="https://cdn-icons-png.flaticon.com/24/145/145807.png " alt="LinkedIn"/></a>
+        <a href="https://www.instagram.com/codebegun" target="_blank" style="margin: 0 10px;"><img src="https://cdn-icons-png.flaticon.com/24/2111/2111463.png" alt="Instagram"/></a>
+        <a href="https://www.youtube.com/@codebegun" target="_blank" style="margin: 0 10px;"><img src="https://cdn-icons-png.flaticon.com/24/1384/1384060.png" alt="YouTube"/></a>
+      </p>
+
+      <p style="font-size: 13px; color: #777; text-align: center; margin-top: 25px;">
+        CodeBegun<br/>
+        Plot No.4, Flat N0.102, SM Reddy Complex, House No.1-98/8/9/A, Madhapur,<br/>
+        Hyderabad - 500081, Telangana, India
+      </p>
+
+      <p style="font-size: 12px; color: #aaa; text-align: center;">
+        You received this email because you signed up with CodeBegun. If you did not request this, please ignore this message.
+      </p>
+    </div>
+  </div>
 `;
 
     await user.save();
