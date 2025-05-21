@@ -21,47 +21,43 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
-      - name: 🚀 Deploy to VPS with Backup & Build
+      - name: 🚀 Deploy with Backup and Build
         run: |
           ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
             TIMESTAMP=$(date +%Y-%m-%d-%H-%M)
             cd /root
 
-            # Step 1: Backup if exists
+            echo "🔍 Checking if lms-app folder exists..."
+
             if [ -d "lms-app" ]; then
               mkdir -p backups
               cp -r lms-app backups/lms-app-\$TIMESTAMP
-              echo "✅ Backup created at backups/lms-app-\$TIMESTAMP"
+              echo "✅ Backup created: backups/lms-app-\$TIMESTAMP"
 
-              # Keep only last 3 backups
+              echo "🧹 Cleaning old backups..."
               ls -dt backups/* | tail -n +4 | xargs rm -rf || true
-              echo "♻️ Old backups cleaned"
+            else
+              echo "⚠️ Warning: lms-app directory not found. Skipping backup."
             fi
 
-            # Step 2: Clone if missing
             if [ ! -d "lms-app" ]; then
               git clone https://github.com/siva563/lms-app.git
               echo "📥 Repo cloned"
             fi
 
-            # Step 3: Deploy latest code
             cd lms-app
             git fetch origin main
             git reset --hard origin/main
 
-            # Step 4: Build frontend
             cd frontend
             npm install
             npm run build
 
-            # Step 5: Backend setup
             cd ../backend
             npm install
 
-            # Step 6: Restart server
             pm2 restart lms-backend
-
-            echo "✅ Deployment complete!"
+            echo "✅ Deployment finished!"
           EOF
 
       - name: 📧 Notify on Success
@@ -76,12 +72,16 @@ jobs:
           to: gsivaprasad2009@gmail.com
           from: ${{ secrets.EMAIL_USER }}
           body: |
-            ✅ LMS App has been deployed to Hosting Raja.
+            ✅ LMS App has been successfully deployed to Hosting Raja.
 
             🔁 Repo: ${{ github.repository }}
             📦 Branch: ${{ github.ref_name }}
             📌 Commit: ${{ github.event.head_commit.message }}
-            🔗 Time: ${{ github.event.head_commit.timestamp }}
+            🕒 Time: ${{ github.event.head_commit.timestamp }}
+
+            ✅ Backup created if applicable.
+            ✅ Frontend and backend built.
+            ✅ Server restarted.
 
             Regards, GitHub Actions
 
@@ -102,8 +102,8 @@ jobs:
             🔁 Repo: ${{ github.repository }}
             📦 Branch: ${{ github.ref_name }}
             📌 Commit: ${{ github.event.head_commit.message }}
-            🔗 Time: ${{ github.event.head_commit.timestamp }}
+            🕒 Time: ${{ github.event.head_commit.timestamp }}
 
-            Please check GitHub Actions logs.
+            Please check the GitHub Actions log for details.
 
             Regards, GitHub Actions
