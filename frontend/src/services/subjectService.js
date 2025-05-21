@@ -36,7 +36,9 @@
 import axios from "axios";
 
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api/subjects";
+//const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api/subjects";
+
+const API = `${import.meta.env.VITE_API_URL}`;
 
 export const getSubjects = async () => {
   const token = localStorage.getItem("token");
