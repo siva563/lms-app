@@ -137,7 +137,7 @@ exports.createUser = async (req, res) => {
       <p style="font-size: 13px; color: #777; text-align: center; margin-top: 25px;">
         CodeBegun<br/>
         Plot No.4, Flat N0.102, SM Reddy Complex, House No.1-98/8/9/A, Madhapur,<br/>
-        Hyderabad - 500081, Telangana, India.
+        Hyderabad - 500081, Telangana, India
       </p>
 
       <p style="font-size: 12px; color: #aaa; text-align: center;">
