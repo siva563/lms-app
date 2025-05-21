@@ -11,7 +11,8 @@ const API = `${import.meta.env.VITE_API_URL}`;
 
 export const markLoginAPI = async (latitude, longitude) => {
 
-
+    console.log("latitude" + latitude);
+    console.log("longitude" + longitude);
     const res = await axios.post(`${API}/attendance/mark-login`, {
         latitude,
         longitude

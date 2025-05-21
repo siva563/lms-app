@@ -37,13 +37,76 @@ const Batch = require("../models/Batch");
 
 // controllers/attendanceController.js
 
+const haversineDistance = (lat1, lon1, lat2, lon2) => {
+    const toRad = (value) => value * Math.PI / 180;
+    const R = 6371000; // Earth radius in meters
+
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in meters
+};
+
+// exports.markLoginTime = async (req, res) => {
+//     try {
+//         const studentId = req.user._id;
+//         const batchId = req.user.batchId;
+
+//         const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+//         let attendance = await Attendance.findOne({ studentId, date: today });
+
+//         if (!attendance) {
+//             attendance = new Attendance({
+//                 studentId,
+//                 batchId,
+//                 date: today,
+//                 loginTime: new Date(),
+//             });
+//         } else {
+//             attendance.loginTime = new Date();
+//         }
+
+//         await attendance.save();
+//         res.json({ message: "Login time marked ✅", loginTime: attendance.loginTime });
+//     } catch (err) {
+//         console.error("Error marking login:", err);
+//         res.status(500).json({ message: "Server error" });
+//     }
+// };
+
 exports.markLoginTime = async (req, res) => {
     try {
         const studentId = req.user._id;
         const batchId = req.user.batchId;
 
-        const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+        const { latitude, longitude } = req.body;
 
+        if (!latitude || !longitude) {
+            return res.status(400).json({ message: "Location is required" });
+        }
+
+        // Sample institute coordinates (you can fetch from DB/config)
+        //const instituteLat = 17.4483; // e.g., Hyderabad
+       // const instituteLng = 78.3861;
+
+        const instituteLat = parseFloat(process.env.INSTITUTE_LAT);
+        const instituteLng = parseFloat(process.env.INSTITUTE_LNG);
+
+        const distance = haversineDistance(latitude, longitude, instituteLat, instituteLng);
+        console.log(`📍 Student is ${distance.toFixed(2)} meters away`);
+
+        if (distance > 30) {
+            return res.status(403).json({ message: "You are outside the permitted area" });
+        }
+
+        const today = new Date().toISOString().slice(0, 10);
         let attendance = await Attendance.findOne({ studentId, date: today });
 
         if (!attendance) {

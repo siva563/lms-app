@@ -46,8 +46,33 @@ const EnhancedAttendanceCard = () => {
   };
 
   const handleMarkLogin = async () => {
-    await markLoginAPI();
-    await fetchAttendanceData();
+
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        console.log("user latitude" + latitude);
+        console.log("user longitude" + longitude);
+        try {
+          await markLoginAPI(latitude, longitude);
+          await fetchAttendanceData();
+          alert("✅ Attendance marked!");
+        } catch (err) {
+          alert(err?.response?.data?.message || "Something went wrong");
+        }
+      },
+      () => {
+        alert("❌ Unable to retrieve your location");
+      }
+    );
+
+
+
+    // await markLoginAPI();
+    // await fetchAttendanceData();
   };
 
   const handleMarkLogout = async () => {
