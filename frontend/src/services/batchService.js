@@ -1,7 +1,9 @@
 import axios from "axios";
 import { getToken } from "../utils/tokenHelper";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+//const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
+const API = `${import.meta.env.VITE_API_URL}`;
 
 const config = {
     headers: { Authorization: `Bearer ${getToken()}` },
